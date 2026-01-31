@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login • Dekogram</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-box">
+            <div class="card-premium">
+                <span class="logo-big text-gradient">Dekogram</span>
+
+                <div id="errorBox"
+                    style="display: none; background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; padding: 12px; border-radius: var(--radius-md); margin-bottom: 24px; font-size: 13px; font-weight: 600;">
+                </div>
+
+                <form id="loginForm">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 20px;">
+                        <label
+                            style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted);">USERNAME
+                            OR EMAIL</label>
+                        <input type="text" id="username" class="input-premium" placeholder="e.g. admin" required>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label
+                            style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted);">PASSWORD</label>
+                        <input type="password" id="password" class="input-premium" placeholder="••••••••" required>
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 32px;">
+                        <a href="{% url 'password_reset' %}"
+                            style="color: var(--text-muted); font-size: 13px; text-decoration: none; font-weight: 600;">Forgot
+                            password?</a>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-premium" style="width: 100%;">
+                        <span id="btnText">Sign In</span>
+                        <div id="btnLoader"
+                            style="display: none; width: 22px; height: 22px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;">
+                        </div>
+                    </button>
+                </form>
+
+                <div
+                    style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center;">
+                    <p style="font-size: 15px; color: var(--text-muted); font-weight: 500;">
+                        New to Dekogram? <a href="/register/"
+                            style="color: var(--p-500); font-weight: 800; text-decoration: none;">Create Account</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const text = document.getElementById('btnText');
+            const loader = document.getElementById('btnLoader');
+            const errorBox = document.getElementById('errorBox');
+
+            btn.disabled = true;
+            text.style.display = 'none';
+            loader.style.display = 'block';
+            errorBox.style.display = 'none';
+
+            const payload = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const res = await fetch('/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('tokens', JSON.stringify({ access: data.access, refresh: data.refresh }));
+                    window.location.href = '/';
+                } else {
+                    errorBox.textContent = data.error || 'Invalid credentials. Please try again.';
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                errorBox.textContent = 'Network error. Please try again.';
+                errorBox.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                text.style.display = 'inline';
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content">
+    <div class="feed-container">
+        <!-- Stories -->
+        <div class="stories-bar">
+            <div class="story-item" onclick="openStoryUpload()" style="min-width: 74px;">
+                <div class="story-avatar">
+                    <div class="avatar avatar-lg">
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+                            onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    </div>
+                    <div class="add-story">+</div>
+                </div>
+                <span class="story-username">Your Story</span>
+            </div>
+            <div id="storiesList" style="display: flex; gap: 16px;">
+                <!-- Stories will be loaded here via JS -->
+            </div>
+        </div>
+
+        <!-- Feed -->
+        <div id="feedContainer">
+            <!-- Posts will be loaded here via JS -->
+        </div>
+
+        <div class="loading-container" id="loadingIndicator" style="display: none;">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="user-profile-card">
+            <a href="/profile/{{ user.username }}/" class="avatar avatar-lg">
+                <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+                    onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            </a>
+            <div class="user-info">
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-subtitle">{{ user.full_name }}</div>
+            </div>
+            <a href="/logout/" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">Logout</a>
+        </div>
+
+        <div class="suggestions-section">
+            <div class="section-header">
+                <span class="section-title">Suggestions For You</span>
+                <span class="see-all pointer">See All</span>
+            </div>
+            <div id="suggestionsList">
+                <!-- Suggestions will be loaded here -->
+            </div>
+        </div>
+
+        <div class="app-footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">About</a>
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+            <p>&copy; 2026 Dekogram from Deepmind</p>
+        </div>
+    </aside>
+</main>
+{% endblock %}

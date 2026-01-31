@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dekogram{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-container">
+        {% csrf_token %}
+        <header class="app-header">
+            <div class="header-content">
+                <a href="/" class="logo text-gradient" style="font-size: 1.8rem;">Dekogram</a>
+
+                <div class="header-search">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search" id="searchInput" autocomplete="off">
+                    <div id="searchResults" class="search-results-dropdown"></div>
+                </div>
+
+                <nav class="header-nav">
+                    <a href="/" class="nav-icon {% if request.path == '/' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <button class="nav-icon" onclick="openCreateModal()" title="Create Post">
+                        <i class="fas fa-plus-square"></i>
+                    </button>
+                    <a href="/explore/" class="nav-icon {% if '/explore' in request.path %}active{% endif %}">
+                        <i class="fas fa-compass"></i>
+                    </a>
+                    <button class="nav-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-heart"></i>
+                        <span class="notification-badge" style="display: none;"></span>
+                    </button>
+                    <a href="/profile/{{ request.user.username }}/" class="avatar avatar-md pointer"
+                        style="border: 2px solid {% if '/profile' in request.path %}var(--p-500){% else %}transparent{% endif %};">
+                        <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}"
+                            onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        {% block content %}{% endblock %}
+
+        <div id="createModal" class="modal-overlay" style="display: none;" onclick="closeCreateModal(event)">
+            <div class="modal create-post-modal" onclick="event.stopPropagation()"
+                style="animation: fadeInUp 0.4s ease;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Create New Post</h3>
+                    <button class="btn btn-icon" onclick="closeCreateModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPostForm">
+                        <div id="uploadArea" class="upload-area"
+                            onclick="document.getElementById('mediaInput').click()">
+                            <div class="upload-icon" style="font-size: 48px;">✨</div>
+                            <div class="upload-text" style="font-weight: 700;">Bring your moments to life</div>
+                            <div class="upload-subtext">Tap to select photo or video</div>
+                            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;"
+                                onchange="handleFileSelect(event)">
+                        </div>
+
+                        <div id="previewArea" style="display: none;">
+                            <div class="preview-container"
+                                style="border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-flare);">
+                                <img id="previewImage" class="preview-image" style="display: none;">
+                                <video id="previewVideo" class="preview-video" controls style="display: none;"></video>
+                                <button type="button" class="remove-preview" onclick="removePreview()"
+                                    style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <label
+                                    style="display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">CAPTION</label>
+                                <textarea id="caption" class="input-premium" placeholder="What's on your mind?..."
+                                    rows="3"></textarea>
+                            </div>
+
+                            <div style="margin-top: 16px;">
+                                <label
+                                    style="display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">LOCATION</label>
+                                <input type="text" id="location" class="input-premium" placeholder="Add a place...">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" id="modalFooter"
+                    style="display: none; padding: 20px 24px; border-top: 1px solid var(--border); justify-content: flex-end; gap: 12px; background: var(--bg-main);">
+                    <button class="btn btn-secondary" onclick="closeCreateModal()"
+                        style="border-radius: var(--radius-md);">Cancel</button>
+                    <button class="btn-premium" onclick="submitPost()" id="shareBtn" style="padding: 10px 32px;">
+                        <span id="shareBtnText">Share Now</span>
+                        <div id="shareBtnLoader" class="loading-spinner"
+                            style="display: none; width: 20px; height: 20px; border-width: 2px;"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

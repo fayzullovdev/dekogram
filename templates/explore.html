@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Explore • Dekogram{% endblock %}
+
+{% block content %}
+<main class="main-content" style="max-width: 935px; display: block; margin: 32px auto;">
+    <div class="explore-grid" id="exploreGrid">
+        <!-- Explore items will be loaded here via JS -->
+    </div>
+
+    <div class="loading-container" id="loadingIndicator" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let explorePage = 1;
+    let exploreHasMore = true;
+
+    async function loadExplore() {
+        if (!exploreHasMore) return;
+        const loader = document.getElementById('loadingIndicator');
+        loader.style.display = 'flex';
+
+        try {
+            const res = await api.fetch(`/api/posts/?type=explore&page=${explorePage}`);
+            const data = await res.json();
+            const grid = document.getElementById('exploreGrid');
+
+            data.results?.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'explore-item';
+                div.onclick = () => window.location.href = `/profile/${post.user.username}/`;
+                div.innerHTML = `
+                    <video src="${post.media}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>
+                    <div class="explore-overlay">
+                        <div class="explore-stat"><i class="fas fa-heart"></i> ${post.likes_count}</div>
+                        <div class="explore-stat"><i class="fas fa-comment"></i> ${post.comments_count}</div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+
+            exploreHasMore = !!data.next;
+            explorePage++;
+        } catch (e) {
+            console.error(e);
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadExplore);
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) loadExplore();
+    });
+</script>
+{% endblock %}

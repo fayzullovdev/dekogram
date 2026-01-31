@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search • Dekogram{% endblock %}
+
+{% block content %}
+<main class="main-content" style="max-width: 600px; display: block; margin: 32px auto;">
+    <div class="search-page-header" style="margin-bottom: 24px;">
+        <h2 style="font-size: 24px; font-weight: 800; color: var(--text-main);">Search Results</h2>
+        {% if query %}
+        <p style="color: var(--text-muted);">Results for "<span id="searchQueryText">{{ query }}</span>"</p>
+        {% endif %}
+    </div>
+
+    <div id="searchPageResults" class="search-results-list">
+        <!-- Results will be loaded here via JS -->
+    </div>
+
+    <div class="loading-container" id="searchLoading" style="display: none; padding: 40px; justify-content: center;">
+        <div class="loading-spinner"></div>
+    </div>
+</main>
+
+<style>
+    .search-results-list {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .search-page-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        text-decoration: none;
+        color: var(--text-main);
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+    }
+
+    .search-page-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-page-item:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .search-page-info {
+        flex: 1;
+    }
+
+    .search-page-username {
+        font-weight: 700;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .search-page-fullname {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        if (query) {
+            performSearchPage(query);
+        }
+    });
+
+    async function performSearchPage(query) {
+        const list = document.getElementById('searchPageResults');
+        const loader = document.getElementById('searchLoading');
+
+        list.innerHTML = '';
+        loader.style.display = 'flex';
+
+        try {
+            const res = await api.fetch(`/api/users/search/?q=${query}`);
+            if (res.ok) {
+                const users = await res.json();
+                loader.style.display = 'none';
+
+                if (users.length === 0) {
+                    list.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">Bunday user yo'q</div>`;
+                } else {
+                    users.forEach(user => {
+                        const item = document.createElement('a');
+                        item.className = 'search-page-item';
+                        item.href = `/profile/${user.username}/`;
+                        item.innerHTML = `
+                            <div class="avatar avatar-lg" style="width: 54px; height: 54px;">
+                                <img src="${user.avatar}" alt="${user.username}" onerror="this.src='/static/images/default-avatar.png'">
+                            </div>
+                            <div class="search-page-info">
+                                <div class="search-page-username">
+                                    ${user.username} 
+                                    ${user.is_verified ? '<i class="fas fa-check-circle verified-badge" style="font-size: 14px;"></i>' : ''}
+                                </div>
+                                <div class="search-page-fullname">${user.full_name}</div>
+                            </div>
+                            <button class="btn-premium" style="padding: 6px 16px; font-size: 13px;">View Profile</button>
+                        `;
+                        list.appendChild(item);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Search page error:', err);
+            loader.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}
