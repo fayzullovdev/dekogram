@@ -26,7 +26,18 @@ SECRET_KEY = 'django-insecure-8^w7kr(jcm15v_)^eqxpa!nj5pd8g6=i$m!k3g4@66ofe!vz!h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    "dekogram.onrender.com",
+    ".onrender.com",
+    "localhost",
+    "127.0.0.1"
+]
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://dekogram.onrender.com"
+]
+
 
 
 # Application definition
