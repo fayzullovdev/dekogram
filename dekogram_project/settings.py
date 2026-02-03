@@ -190,3 +190,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 # Email Settings (for Password Reset)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'support@dekogram.com'
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
